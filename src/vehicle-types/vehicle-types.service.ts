@@ -15,7 +15,7 @@ export class VehicleTypesService {
     private dataSource: DataSource,
   ) {}
 
-  async findByMakeId(makeId: number): Promise<any> {
+  async findByMakeId(makeId: number): Promise<VehicleType[]> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
 
@@ -58,14 +58,15 @@ export class VehicleTypesService {
             },
           });
 
-          if (!_vt.makes) {
-            _vt.makes = [];
+          if (!make.vehicleTypes) {
+            make.vehicleTypes = [];
           }
 
-          if (!_vt.makes.find((m) => m.id === make.id)) {
-            _vt.makes.push(make);
-            await queryRunner.manager.save(_vt);
+          if (!make.vehicleTypes.some((vt) => vt.id === _vt.id)) {
+            make.vehicleTypes.push(_vt);
           }
+
+          await queryRunner.manager.save(make);
         }
 
         await queryRunner.commitTransaction();
