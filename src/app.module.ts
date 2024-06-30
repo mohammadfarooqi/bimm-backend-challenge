@@ -14,6 +14,8 @@ import { join } from 'path';
 import { MakesResolver } from './makes/makes.resolver';
 import { MakesService } from './makes/makes.service';
 import { Make } from './makes/make.entity';
+import { HttpModule } from '@nestjs/axios';
+import { MakesApiService } from './makes/makes-api/makes-api.service';
 
 @Module({
   imports: [
@@ -26,7 +28,7 @@ import { Make } from './makes/make.entity';
       imports: [ConfigModule],
       inject: [NestConfigService],
       useFactory: (configService: NestConfigService) => ({
-        playground: configService.get('node_env') != 'production', // TODO: make it dynamic based on node_env
+        playground: configService.get<string>('node_env') != 'production',
         autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
         sortSchema: true,
       }),
@@ -36,19 +38,26 @@ import { Make } from './makes/make.entity';
       inject: [NestConfigService],
       useFactory: (configService: NestConfigService) => ({
         type: 'postgres',
-        host: configService.get('db.host'),
-        port: configService.get('db.port'),
-        username: configService.get('db.username'),
-        password: configService.get('db.password'),
-        database: configService.get('db.database'),
+        host: configService.get<string>('db.host'),
+        port: configService.get<number>('db.port'),
+        username: configService.get<string>('db.username'),
+        password: configService.get<string>('db.password'),
+        database: configService.get<string>('db.database'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: true, // TODO: not use syncronize in prod, setup migrations instead
-        ssl: true,
+        synchronize: configService.get('node_env') != 'production',
+        ssl: configService.get<boolean>('db.ssl'),
       }),
     }),
     TypeOrmModule.forFeature([Make]),
+    HttpModule,
   ],
   controllers: [AppController],
-  providers: [AppService, ConfigService, MakesResolver, MakesService],
+  providers: [
+    AppService,
+    ConfigService,
+    MakesResolver,
+    MakesService,
+    MakesApiService,
+  ],
 })
 export class AppModule {}

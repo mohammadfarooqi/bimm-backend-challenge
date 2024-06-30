@@ -1,5 +1,5 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
 
 @ObjectType()
 @Entity()
@@ -9,7 +9,13 @@ export class Make {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Field()
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  @Field((type) => Int, { name: 'makeId' })
+  @Index({ unique: true })
+  @Column()
+  code: number;
+
+  @Field({ name: 'makeName' })
   @Column()
   name: string;
 }

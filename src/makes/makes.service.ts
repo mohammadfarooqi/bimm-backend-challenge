@@ -1,16 +1,59 @@
 import { Injectable } from '@nestjs/common';
 import { Make } from './make.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
+import { MakesApiService } from './makes-api/makes-api.service';
+import { chunk } from 'lodash';
 
 @Injectable()
 export class MakesService {
   constructor(
     @InjectRepository(Make) private makesRepository: Repository<Make>,
+    private makesAPIService: MakesApiService,
+    private dataSource: DataSource,
   ) {}
 
   async findAll(): Promise<Make[]> {
-    return this.makesRepository.find();
+    const { makes } = await this.makesAPIService.fetchAllMakes();
+    console.log('apiMakes', makes);
+
+    const makesChunks = chunk(makes, 500);
+
+    console.log('makesChunks', makesChunks);
+
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+
+    try {
+      for (const makesChunk of makesChunks) {
+        await queryRunner.startTransaction();
+
+        const values = makesChunk
+          .map((make) => `('${make.code}', '${make.name.replace(/'/g, "''")}')`)
+          .join(', ');
+
+        await queryRunner.query(`
+          INSERT INTO make (code, name)
+          VALUES ${values}
+          ON CONFLICT (code) DO UPDATE SET
+          name = EXCLUDED.name
+        `);
+
+        await queryRunner.commitTransaction();
+      }
+    } catch (error) {
+      console.log('error', error);
+      await queryRunner.rollbackTransaction();
+    } finally {
+      // you need to release query runner which is manually created:
+      await queryRunner.release();
+    }
+
+    return this.makesRepository.find({
+      order: {
+        code: 'ASC',
+      },
+    });
   }
 
   create(make: Make): Promise<Make> {

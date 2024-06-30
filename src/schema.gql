@@ -4,7 +4,8 @@
 
 type Make {
   id: Int!
-  name: String!
+  makeId: Int!
+  makeName: String!
 }
 
 type Query {
