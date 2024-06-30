@@ -49,11 +49,14 @@ export class MakesService {
       await queryRunner.release();
     }
 
-    return this.makesRepository.find({
-      order: {
-        code: 'ASC',
-      },
-    });
+    return this.makesRepository
+      .createQueryBuilder('make')
+      .leftJoinAndSelect('make.vehicleTypes', 'vehicleType')
+      .orderBy({
+        'make.code': 'ASC',
+        'vehicleType.code': 'ASC',
+      })
+      .getMany();
   }
 
   create(make: Make): Promise<Make> {

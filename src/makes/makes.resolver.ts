@@ -10,7 +10,6 @@ export class MakesResolver {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   @Query((returns) => [Make])
   makes(): Promise<Make[]> {
-    console.log('test');
     return this.makesService.findAll();
   }
 }
