@@ -11,7 +11,7 @@ export class MakesApiService {
   ) {}
 
   async fetchAllMakes(): Promise<{
-    makes: { code: string; name: string }[];
+    makes: { code: number; name: string }[];
     count: number;
   }> {
     const response = await this.httpService
