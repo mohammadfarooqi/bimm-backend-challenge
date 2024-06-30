@@ -1,6 +1,6 @@
 import { Query, Resolver } from '@nestjs/graphql';
 import { MakesService } from './makes.service';
-import { Make } from './make.entity';
+import { Make } from './entities/make.entity';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 @Resolver((of) => Make)

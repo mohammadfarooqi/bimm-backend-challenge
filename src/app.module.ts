@@ -13,9 +13,13 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
 import { MakesResolver } from './makes/makes.resolver';
 import { MakesService } from './makes/makes.service';
-import { Make } from './makes/make.entity';
+import { Make } from './makes/entities/make.entity';
 import { HttpModule } from '@nestjs/axios';
 import { MakesApiService } from './makes/makes-api/makes-api.service';
+import { VehicleTypesService } from './vehicle-types/vehicle-types.service';
+import { VehicleTypesResolver } from './vehicle-types/vehicle-types.resolver';
+import { VehicleTypesApiService } from './vehicle-types/vehicle-types-api/vehicle-types-api.service';
+import { VehicleType } from './vehicle-types/entities/vehicle-type.entity';
 
 @Module({
   imports: [
@@ -48,7 +52,7 @@ import { MakesApiService } from './makes/makes-api/makes-api.service';
         ssl: configService.get<boolean>('db.ssl'),
       }),
     }),
-    TypeOrmModule.forFeature([Make]),
+    TypeOrmModule.forFeature([Make, VehicleType]),
     HttpModule,
   ],
   controllers: [AppController],
@@ -58,6 +62,9 @@ import { MakesApiService } from './makes/makes-api/makes-api.service';
     MakesResolver,
     MakesService,
     MakesApiService,
+    VehicleTypesService,
+    VehicleTypesResolver,
+    VehicleTypesApiService,
   ],
 })
 export class AppModule {}

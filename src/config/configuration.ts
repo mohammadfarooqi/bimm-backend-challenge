@@ -15,6 +15,6 @@ export default () => ({
       'https://vpic.nhtsa.dot.gov/api/vehicles/getallmakes?format=XML',
     all_vehicle_types:
       process.env.ALL_VEHICLE_TYPES_ENDPOINT ||
-      'https://vpic.nhtsa.dot.gov/api/vehicles/GetVehicleTypesForMakeId/440?format=XML',
+      'https://vpic.nhtsa.dot.gov/api/vehicles/GetVehicleTypesForMakeId/:makeId?format=XML',
   },
 });

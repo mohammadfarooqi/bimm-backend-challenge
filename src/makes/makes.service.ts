@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Make } from './make.entity';
+import { Make } from './entities/make.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { MakesApiService } from './makes-api/makes-api.service';

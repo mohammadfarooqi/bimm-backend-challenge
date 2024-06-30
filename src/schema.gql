@@ -6,8 +6,17 @@ type Make {
   id: Int!
   makeId: Int!
   makeName: String!
+  vehicleTypes: [VehicleType!]
 }
 
 type Query {
   makes: [Make!]!
+  vehicleTypes(makeId: Int!): [VehicleType!]!
+}
+
+type VehicleType {
+  id: Int!
+  makes: [Make!]!
+  typeId: Int!
+  typeName: String!
 }

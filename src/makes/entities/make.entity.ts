@@ -1,5 +1,13 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
-import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
+import { VehicleType } from 'src/vehicle-types/entities/vehicle-type.entity';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinTable,
+  ManyToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @ObjectType()
 @Entity()
@@ -18,4 +26,10 @@ export class Make {
   @Field({ name: 'makeName' })
   @Column()
   name: string;
+
+  @ManyToMany(() => VehicleType, (vehicleType) => vehicleType.makes)
+  @JoinTable()
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  @Field((type) => [VehicleType], { nullable: true })
+  vehicleTypes: VehicleType[];
 }
