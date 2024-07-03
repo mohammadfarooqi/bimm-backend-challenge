@@ -76,6 +76,7 @@ To enhance the application further, consider the following improvements:
 - Add more robust error handling and retry mechanisms for the external API calls.
 - Add rate limiting to prevent abuse and ensure service availablity.
 - Add Swagger or GraphiQL for better interface for exploring and testing API Endpoints and documentation.
+- Add different Dockerfiles for seperate envs, dev vs. prod
 
 ### Features
 
