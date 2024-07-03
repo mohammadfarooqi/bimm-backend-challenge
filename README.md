@@ -1,73 +1,155 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# Vehicle Data Processor
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+This Vehicle Data Processor is a robust data handling application built with NestJS, GraphQL, TypeORM, PostgreSQL, Redis, and BullMQ. It is designed to fetch, process, and store vehicle data from an external API and facilitating easy access through GraphQL queries.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Getting Started
 
-## Description
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+### Prerequisites
 
-## Installation
+Before you begin, ensure you have the following installed:
+- Docker
+- node >= 18
+- Properly setup .env file based on .env_sample provided in this repo.
+
+### Installation
+
+Clone the repository:
 
 ```bash
-$ npm install
+git clone https://github.com/mohammadfarooqi/bimm-backend-challenge.git
+cd bimm-backend-challenge
 ```
 
-## Running the app
+### Running the Application
+
+#### Dockerized Setup
+
+To run the application using Docker:
 
 ```bash
-# development
-$ npm run start
+# If you want to run the container for prod, then update the npm script from npm run start:dev to npm run start:prod in Dockerfile
 
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+docker compose up
 ```
 
-## Test
+#### Local Development
+
+For local development, you can use npm scripts:
 
 ```bash
-# unit tests
-$ npm run test
+# Install Dependencies
+npm install
 
-# e2e tests
-$ npm run test:e2e
+# Development mode
+npm run start
 
-# test coverage
-$ npm run test:cov
+# Watch mode
+npm run start:dev
+
+# Production mode
+npm run start:prod
 ```
 
-## Support
+### Functionality
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+When the application starts, it spins up a BullMQ batch queue. This queue fetches approximately 11,000 'makes' (as of 2024-07-03) data entries from an external API. Each entry is then processed and added to a 'vehicle type' queue with a concurrency of 20. During processing, the application stores the 'make' and 'vehicle type' data in the database, which is subsequently used for GraphQL queries.
 
-## Stay in touch
+Key operational details:
+- If particular job fails it'll be retried 3 times.
+- The batch job is scheduled to run at every 12:00AM.
+- On start of app, queue is flushed for pending, or in progress jobs, and new immediate batch job is initiated.
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+### External API Notes
 
-## License
+The external API `https://vpic.nhtsa.dot.gov/api/vehicles/GetVehicleTypesForMakeId/:makeId?format=xml` may return a 4xx (majorly 403) error. For now the app would exponentially retry 3 times on any failure. This process needs to be investigated further and debugged to bring robustness to the retry mechanism.
 
-Nest is [MIT licensed](LICENSE).
+### Improvements
+
+To enhance the application further, consider the following improvements:
+
+- Integrate Bullboard UI for real-time monitoring and management of batch processing jobs.
+- Add better logger package like winston or pino
+- Add a cache mechanism for GraphQL so we can pull from cache instead of fetching from db everytime.
+- Add more tests for the application.
+- Add more robust error handling and retry mechanisms for the external API calls.
+- Add rate limiting to prevent abuse and ensure service availablity.
+- Add Swagger or GraphiQL for better interface for exploring and testing API Endpoints and documentation.
+
+### Features
+
+Grahphql Playground: http://localhost:8080/graphql
+
+Endpoints
+1. Fetch makes
+
+```graphql
+Request
+
+makes(page:1, pageSize:10){
+  	page
+  	pageSize
+  	totalItems
+  	data {
+  	  makeId
+  	  makeName
+  	  vehicleTypes {
+        typeId
+        typeName
+      }
+   }
+}
+
+Response
+
+{
+  "data": {
+    "makes": {
+      "page": 2,
+      "pageSize": 10,
+      "totalItems": 11388,
+      "data": [
+        {
+          "makeId": 458,
+          "makeName": "MOONLIGHT CHOPPERS",
+          "vehicleTypes": [
+            {
+              "typeId": 1,
+              "typeName": "Motorcycle"
+            }
+          ]
+        },
+        ...
+      ]
+    }
+  }
+}
+```
+
+2. Fetch Vehicle Type by make id.
+
+```graphql
+
+Request
+vehicleTypes(makeId: 440) {
+  typeId
+  typeName
+}
+
+Response
+{
+  "data": {
+    "vehicleTypes": [
+      {
+        "typeId": 2,
+        "typeName": "Passenger Car"
+      },
+      {
+        "typeId": 7,
+        "typeName": "Multipurpose Passenger Vehicle (MPV)"
+      }
+    ]
+  }
+}
+```

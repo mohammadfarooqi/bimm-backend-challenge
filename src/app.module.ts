@@ -1,11 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import {
-  ConfigModule,
-  ConfigService as NestConfigService,
-} from '@nestjs/config';
-import { ConfigService } from './config/config.service';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import configuration from './config/configuration';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -20,6 +16,13 @@ import { VehicleTypesService } from './vehicle-types/vehicle-types.service';
 import { VehicleTypesResolver } from './vehicle-types/vehicle-types.resolver';
 import { VehicleTypesApiService } from './vehicle-types/vehicle-types-api/vehicle-types-api.service';
 import { VehicleType } from './vehicle-types/entities/vehicle-type.entity';
+import { BullMqModule, RegisterQueues } from './bullMQ/bullMQ.config';
+
+import { BatchProcessor } from './bullMQ/processors/batch.processor';
+import { MakeEventListner } from './bullMQ/event-listener/vehicleType.eventsListener';
+import { BatchEventListner } from './bullMQ/event-listener/batch.eventsListener';
+import { QueueService } from './bullMQ/queue.service';
+import { VehicleTypeProcessor } from './bullMQ/processors/vehicleType.processor';
 
 @Module({
   imports: [
@@ -30,8 +33,8 @@ import { VehicleType } from './vehicle-types/entities/vehicle-type.entity';
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
       imports: [ConfigModule],
-      inject: [NestConfigService],
-      useFactory: (configService: NestConfigService) => ({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
         playground: configService.get<string>('node_env') != 'production',
         autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
         sortSchema: true,
@@ -39,8 +42,8 @@ import { VehicleType } from './vehicle-types/entities/vehicle-type.entity';
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      inject: [NestConfigService],
-      useFactory: (configService: NestConfigService) => ({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
         type: 'postgres',
         host: configService.get<string>('db.host'),
         port: configService.get<number>('db.port'),
@@ -54,17 +57,24 @@ import { VehicleType } from './vehicle-types/entities/vehicle-type.entity';
     }),
     TypeOrmModule.forFeature([Make, VehicleType]),
     HttpModule,
+    BullMqModule,
+    RegisterQueues,
   ],
   controllers: [AppController],
   providers: [
     AppService,
-    ConfigService,
     MakesResolver,
     MakesService,
     MakesApiService,
     VehicleTypesService,
     VehicleTypesResolver,
     VehicleTypesApiService,
+    QueueService,
+
+    VehicleTypeProcessor,
+    BatchProcessor,
+    MakeEventListner,
+    BatchEventListner,
   ],
 })
 export class AppModule {}

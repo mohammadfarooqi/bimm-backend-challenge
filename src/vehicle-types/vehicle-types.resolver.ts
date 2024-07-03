@@ -14,6 +14,6 @@ export class VehicleTypesResolver {
   vehicleTypes(
     @Args('makeId', { type: () => Int }) makeId: number,
   ): Promise<VehicleType[]> {
-    return this.vtService.findByMakeId(makeId);
+    return this.vtService.findVehicleTypeByMakeID(makeId);
   }
 }

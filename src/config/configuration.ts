@@ -4,10 +4,14 @@ export default () => ({
   db: {
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT, 10) || 5432,
-    username: process.env.DB_USER || 'admin',
-    password: process.env.DB_PASSWORD || 'password',
-    database: process.env.DB_NAME || 'testDB',
+    username: process.env.DB_USER || 'ravi',
+    password: process.env.DB_PASSWORD || '',
+    database: process.env.DB_NAME || 'test',
     ssl: process.env.DB_SSL === 'true' ?? true,
+  },
+  redis: {
+    host: process.env.REDIS_HOST || 'localhost',
+    port: parseInt(process.env.REDIS_PORT, 10) || 6379,
   },
   endpoints: {
     all_makes:

@@ -33,3 +33,22 @@ export class Make {
   @Field((type) => [VehicleType], { nullable: true })
   vehicleTypes: VehicleType[];
 }
+
+@ObjectType()
+export class PaginatedMake {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  @Field((type) => Int)
+  page: number;
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  @Field((type) => Int)
+  pageSize: number;
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  @Field((type) => Int)
+  totalItems: number;
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  @Field((type) => [Make])
+  data: Make[];
+}

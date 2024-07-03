@@ -9,8 +9,15 @@ type Make {
   vehicleTypes: [VehicleType!]
 }
 
+type PaginatedMake {
+  data: [Make!]!
+  page: Int!
+  pageSize: Int!
+  totalItems: Int!
+}
+
 type Query {
-  makes: [Make!]!
+  makes(page: Int!, pageSize: Int!): PaginatedMake!
   vehicleTypes(makeId: Int!): [VehicleType!]!
 }
 
